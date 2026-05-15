@@ -1,5 +1,5 @@
-# Configuración con credenciales
-config.php
+# Configuración local (ahora usa env vars, se puede subir)
+# config.php
 
 # Logs del tracker
 firmware/pc_tracker/tracker.log
@@ -13,6 +13,7 @@ firmware/pc_tracker/*.spec
 # PHP / XAMPP
 *.log
 error_log
+.claude
 
 # IDE
 .vscode/
