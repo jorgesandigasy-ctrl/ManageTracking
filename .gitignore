@@ -1,0 +1,23 @@
+# Configuración con credenciales
+config.php
+
+# Logs del tracker
+firmware/pc_tracker/tracker.log
+firmware/pc_tracker/*.log
+
+# Compilados
+firmware/pc_tracker/tracker.exe
+firmware/pc_tracker/build/
+firmware/pc_tracker/*.spec
+
+# PHP / XAMPP
+*.log
+error_log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
