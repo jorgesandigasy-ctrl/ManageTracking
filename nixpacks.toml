@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.mysqli", "php82Extensions.mbstring", "apacheHttpd"]
+nixPkgs = ["php82", "php82Extensions.mysqli", "php82Extensions.mbstring", "php82Extensions.openssl", "php82Extensions.curl"]
 
 [start]
-cmd = "apache2 -D FOREGROUND"
+cmd = "php -S 0.0.0.0:$PORT"
