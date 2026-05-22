@@ -13,7 +13,7 @@ include __DIR__ . '/layouts/head.php';
 <main class="flex-1 overflow-y-auto">
     <div class="sticky top-0 z-10 bg-gray-800 border-b border-gray-700 h-16 flex items-center justify-between px-6">
         <div>
-            <h1 class="text-lg font-bold">Dashboard</h1>
+            <h1 class="text-lg font-bold">Métricas</h1>
             <p class="text-gray-400 text-xs">Vista general del sistema</p>
         </div>
     </div>
@@ -44,27 +44,83 @@ include __DIR__ . '/layouts/head.php';
             </div>
         </div>
 
-        <!-- Indicadores de tesis -->
-        <div class="grid grid-cols-4 gap-4">
-            <div class="bg-gray-800 rounded-xl border border-gray-700 border-t-4 border-t-blue-500 p-5">
-                <p class="text-xs text-blue-400 uppercase tracking-wider mb-1">Tiempo de respuesta</p>
-                <p id="ind-tiempo" class="text-3xl font-bold text-blue-400">—</p>
-                <p class="text-xs text-gray-500 mt-1">ms promedio (API)</p>
+        <!-- ═══════════════════════════════════════════════════════════════
+             INDICADORES DE TESIS
+             Se calculan en api/indicadores.php y se renderizan con Chart.js
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-700">
+                <h3 class="font-medium">Indicadores</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Actualizados cada 60 segundos</p>
             </div>
-            <div class="bg-gray-800 rounded-xl border border-gray-700 border-t-4 border-t-cyan-500 p-5">
-                <p class="text-xs text-cyan-400 uppercase tracking-wider mb-1">Trazabilidad</p>
-                <p id="ind-trazabilidad" class="text-3xl font-bold text-cyan-400">—</p>
-                <p id="ind-trazabilidad-det" class="text-xs text-gray-500 mt-1">equipos con GPS</p>
-            </div>
-            <div class="bg-gray-800 rounded-xl border border-gray-700 border-t-4 border-t-orange-500 p-5">
-                <p class="text-xs text-orange-400 uppercase tracking-wider mb-1">Incidencias</p>
-                <p id="ind-incidencias" class="text-3xl font-bold text-orange-400">—</p>
-                <p id="ind-incidencias-det" class="text-xs text-gray-500 mt-1">dispositivos afectados</p>
-            </div>
-            <div class="bg-gray-800 rounded-xl border border-gray-700 border-t-4 border-t-purple-500 p-5">
-                <p class="text-xs text-purple-400 uppercase tracking-wider mb-1">Satisfacción</p>
-                <p id="ind-satisfaccion" class="text-3xl font-bold text-purple-400">—</p>
-                <p id="ind-satisfaccion-det" class="text-xs text-gray-500 mt-1">promedio encuesta (1–5)</p>
+            <div class="p-5 grid grid-cols-2 gap-6">
+
+                <!-- ── NT: Nivel de Trazabilidad ──────────────────────────
+                     Fórmula: (equipos con señal ≤24h / total) × 100
+                     Gráfico: velocímetro (doughnut semicircular)          -->
+                <div class="bg-gray-700/40 rounded-xl p-4">
+                    <p class="text-xs text-cyan-400 uppercase tracking-wider font-semibold mb-1">NT — Nivel de Trazabilidad</p>
+                    <p class="text-xs text-gray-400 mb-3">Equipos con señal en las últimas 24h / Total equipos × 100</p>
+                    <div class="relative flex flex-col items-center">
+                        <div style="height:120px;width:240px;position:relative">
+                            <canvas id="chart-nt"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-end pb-1 pointer-events-none">
+                                <span id="ind-nt-val" class="text-2xl font-bold text-cyan-400">—</span>
+                                <span class="text-xs text-gray-400">trazabilidad</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="ind-nt-det" class="text-xs text-gray-500 text-center mt-2">—</p>
+                </div>
+
+                <!-- ── PID: Porcentaje de Incidencias Detectadas ──────────
+                     Fórmula: (incidencias automáticas / total) × 100
+                     Incidencia: estado='perdido' O sin señal >24h
+                     Gráfico: dona (detectadas vs sin incidencia)          -->
+                <div class="bg-gray-700/40 rounded-xl p-4">
+                    <p class="text-xs text-orange-400 uppercase tracking-wider font-semibold mb-1">PID — Incidencias Detectadas</p>
+                    <p class="text-xs text-gray-400 mb-3">Incidencias automáticas (perdido o sin señal) / Total equipos × 100</p>
+                    <div class="flex items-center justify-center gap-6">
+                        <div style="width:140px;height:140px">
+                            <canvas id="chart-pid"></canvas>
+                        </div>
+                        <div class="space-y-2 text-xs text-gray-400">
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></span>Detectadas</div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 flex-shrink-0"></span>Sin incidencia</div>
+                            <p id="ind-pid-val" class="text-orange-400 font-bold text-lg mt-2">—</p>
+                            <p id="ind-pid-det" class="text-gray-500">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TPU: Tiempo Promedio de Ubicación ─────────────────
+                     Fórmula: Σ(tiempo_respuesta_ms) / N peticiones
+                     Fuente: registros_gps.tiempo_respuesta_ms
+                     Gráfico: barras horizontales por equipo               -->
+                <div class="bg-gray-700/40 rounded-xl p-4">
+                    <p class="text-xs text-blue-400 uppercase tracking-wider font-semibold mb-1">TPU — Tiempo Promedio de Ubicación</p>
+                    <p class="text-xs text-gray-400 mb-3">Promedio del tiempo de respuesta de la API por equipo (ms)</p>
+                    <p id="ind-tpu-global" class="text-2xl font-bold text-blue-400 mb-3">— ms</p>
+                    <div style="min-height:80px">
+                        <canvas id="chart-tpu"></canvas>
+                    </div>
+                    <p id="ind-tpu-det" class="text-xs text-gray-500 mt-2">Sin datos de tiempo de respuesta aún</p>
+                </div>
+
+                <!-- ── NSP: Nivel de Satisfacción del Personal ────────────
+                     Fórmula: SUM(p1..p5) / (25 × total_encuestas) × 100
+                     25 = puntaje máximo por encuesta (5 preguntas × 5 pts)
+                     Gráfico: barras horizontales por pregunta              -->
+                <div class="bg-gray-700/40 rounded-xl p-4">
+                    <p class="text-xs text-purple-400 uppercase tracking-wider font-semibold mb-1">NSP — Satisfacción del Personal</p>
+                    <p class="text-xs text-gray-400 mb-3">SUM(respuestas) / (25 × encuestas) × 100 — escala Likert 1–5</p>
+                    <p id="ind-nsp-global" class="text-2xl font-bold text-purple-400 mb-3">—</p>
+                    <div style="min-height:120px">
+                        <canvas id="chart-nsp"></canvas>
+                    </div>
+                    <p id="ind-nsp-det" class="text-xs text-gray-500 mt-2">Sin encuestas respondidas aún</p>
+                </div>
+
             </div>
         </div>
 
@@ -235,30 +291,104 @@ async function cargarDispositivos() {
     } catch (e) { console.error('Error:', e); }
 }
 
+// ── Variables para los 4 gráficos de indicadores (se recrean en cada carga) ──
+let graficaNT = null, graficaPID = null, graficaTPU = null, graficaNSP = null;
+
+// Etiquetas cortas para el gráfico de barras del NSP
+const NSP_ETIQUETAS = ['Utilidad', 'Facilidad de uso', 'Reduce tiempo', 'Mejora control', 'Recomendaría'];
+
 async function cargarIndicadores() {
     try {
         const d = await fetch('api/indicadores.php').then(r => r.json());
 
-        const ms = d.tiempo_promedio_ms;
-        document.getElementById('ind-tiempo').textContent = ms !== null ? Math.round(ms) : '—';
+        // ── NT: Nivel de Trazabilidad ────────────────────────────────────────
+        // Velocímetro semicircular: doughnut con circumference=180 y rotation=-90
+        const NT = d.trazabilidad.porcentaje;
+        document.getElementById('ind-nt-val').textContent = NT + '%';
+        document.getElementById('ind-nt-det').textContent =
+            `${d.trazabilidad.con_senal} de ${d.trazabilidad.total} equipos reportaron en las últimas 24h`;
 
-        document.getElementById('ind-trazabilidad').textContent = d.trazabilidad.porcentaje + '%';
-        document.getElementById('ind-trazabilidad-det').textContent =
-            `${d.trazabilidad.con_registros} / ${d.trazabilidad.total} equipos con GPS`;
+        const ctxNT = document.getElementById('chart-nt').getContext('2d');
+        const colorNT = NT >= 75 ? '#22d3ee' : NT >= 50 ? '#f59e0b' : '#ef4444';
+        if (graficaNT) graficaNT.destroy();
+        graficaNT = new Chart(ctxNT, {
+            type: 'doughnut',
+            data: { datasets: [{ data: [NT, 100 - NT], backgroundColor: [colorNT, '#374151'], borderWidth: 0, circumference: 180, rotation: -90 }] },
+            options: { responsive: true, cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+        });
 
-        document.getElementById('ind-incidencias').textContent = d.incidencias.porcentaje + '%';
-        document.getElementById('ind-incidencias-det').textContent =
-            `${d.incidencias.total} afectados (${d.incidencias.perdidos} perdidos, ${d.incidencias.sin_senal} sin señal)`;
+        // ── PID: Porcentaje de Incidencias Detectadas ────────────────────────
+        // Dona: segmento rojo = detectadas automáticamente, verde = sin incidencia
+        const PID = d.incidencias.porcentaje;
+        document.getElementById('ind-pid-val').textContent = PID + '%';
+        document.getElementById('ind-pid-det').textContent =
+            `${d.incidencias.detectadas} detectadas (${d.incidencias.perdidos} perdidos, ${d.incidencias.sin_senal} sin señal)`;
 
-        const sat = d.satisfaccion;
-        if (sat.total > 0) {
-            document.getElementById('ind-satisfaccion').textContent = sat.promedio.toFixed(1);
-            document.getElementById('ind-satisfaccion-det').textContent =
-                `${sat.porcentaje}% satisfacción · ${sat.total} respuestas`;
-        } else {
-            document.getElementById('ind-satisfaccion').textContent = '—';
-            document.getElementById('ind-satisfaccion-det').textContent = 'sin respuestas aún';
+        const ctxPID = document.getElementById('chart-pid').getContext('2d');
+        if (graficaPID) graficaPID.destroy();
+        graficaPID = new Chart(ctxPID, {
+            type: 'doughnut',
+            data: {
+                labels: ['Detectadas', 'Sin incidencia'],
+                datasets: [{ data: [d.incidencias.detectadas || 0.01, d.incidencias.sin_incidencia || 0.01], backgroundColor: ['#ef4444', '#22c55e'], borderWidth: 0, hoverOffset: 4 }]
+            },
+            options: { responsive: true, cutout: '60%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${Math.round(ctx.parsed)}` } } } }
+        });
+
+        // ── TPU: Tiempo Promedio de Ubicación ────────────────────────────────
+        // Barras horizontales: un bar por equipo con su promedio en ms
+        const tpu = d.tiempo_ubicacion;
+        document.getElementById('ind-tpu-global').textContent =
+            tpu.promedio_ms !== null ? Math.round(tpu.promedio_ms) + ' ms' : '— ms';
+
+        if (tpu.por_equipo && tpu.por_equipo.length > 0) {
+            document.getElementById('ind-tpu-det').textContent =
+                `${tpu.por_equipo.reduce((s, e) => s + e.total_peticiones, 0)} peticiones totales registradas`;
+            const ctxTPU = document.getElementById('chart-tpu').getContext('2d');
+            if (graficaTPU) graficaTPU.destroy();
+            graficaTPU = new Chart(ctxTPU, {
+                type: 'bar',
+                data: {
+                    labels: tpu.por_equipo.map(e => e.nombre),
+                    datasets: [{ label: 'ms', data: tpu.por_equipo.map(e => e.promedio_ms), backgroundColor: '#3b82f6', borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' }, title: { display: true, text: 'ms', color: '#9ca3af' } },
+                        y: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
         }
+
+        // ── NSP: Nivel de Satisfacción del Personal ──────────────────────────
+        // Barras horizontales: una por pregunta, escala 0–5
+        const nsp = d.satisfaccion;
+        if (nsp.total > 0) {
+            document.getElementById('ind-nsp-global').textContent = nsp.porcentaje + '%';
+            document.getElementById('ind-nsp-det').textContent =
+                `${nsp.total} encuesta${nsp.total > 1 ? 's' : ''} respondida${nsp.total > 1 ? 's' : ''}`;
+            const ctxNSP = document.getElementById('chart-nsp').getContext('2d');
+            if (graficaNSP) graficaNSP.destroy();
+            graficaNSP = new Chart(ctxNSP, {
+                type: 'bar',
+                data: {
+                    labels: NSP_ETIQUETAS,
+                    datasets: [{ label: 'Promedio', data: nsp.por_pregunta, backgroundColor: '#8b5cf6', borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { min: 0, max: 5, grid: { color: '#374151' }, ticks: { color: '#9ca3af' }, title: { display: true, text: 'Puntaje (1–5)', color: '#9ca3af' } },
+                        y: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+
     } catch (e) { console.error('indicadores:', e); }
 }
 

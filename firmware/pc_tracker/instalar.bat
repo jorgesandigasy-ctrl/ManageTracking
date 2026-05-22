@@ -24,7 +24,7 @@ echo Dependencias OK
 REM ── Compilar exe ──────────────────────────────────────
 echo Compilando tracker.exe...
 pip install pyinstaller --quiet
-pyinstaller --noconsole --onefile tracker.py --distpath . --workpath build --specpath build
+python -m PyInstaller --noconsole --onefile tracker.py --distpath . --workpath build --specpath build
 echo Compilado OK
 
 REM ── Task Scheduler ────────────────────────────────────

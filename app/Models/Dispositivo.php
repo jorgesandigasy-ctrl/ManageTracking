@@ -3,12 +3,22 @@ require_once dirname(__DIR__, 2) . '/config/Database.php';
 
 class Dispositivo {
     public static function getAll(): array {
+        // El estado se calcula dinámicamente según ultima_vez:
+        //   - 'perdido'  → marcado manualmente por el admin (no se sobreescribe)
+        //   - 'activo'   → ultima_vez en las últimas 2 horas (tracker corriendo)
+        //   - 'inactivo' → sin señal hace más de 2 horas (PC apagada)
+        // 2h = intervalo de envío (1h) + margen de tolerancia (1h)
         return Database::get()->query("
             SELECT d.mac_address, d.hostname, d.nombre_usuario, d.apellido_usuario,
-                   d.telefono_usuario, d.tipo, d.estado, d.sede_id,
+                   d.telefono_usuario, d.tipo, d.sede_id,
                    s.nombre AS sede_nombre,
                    d.windows_version, d.procesador, d.ram_gb, d.almacenamiento_gb,
                    d.serie_equipo, d.api_key, d.ultima_vez,
+                   CASE
+                       WHEN d.estado = 'perdido'                              THEN 'perdido'
+                       WHEN d.ultima_vez >= NOW() - INTERVAL 2 HOUR          THEN 'activo'
+                       ELSE 'inactivo'
+                   END AS estado,
                    g.latitud, g.longitud, g.registrado_en AS ultima_ubicacion
             FROM dispositivos d
             LEFT JOIN sedes s ON s.id = d.sede_id
@@ -103,7 +113,8 @@ class Dispositivo {
     }
 
     public static function validateApiKey(string $mac, string $key): bool {
-        $stmt = Database::get()->prepare("SELECT 1 FROM dispositivos WHERE mac_address=? AND api_key=? AND estado!='inactivo'");
+        // Solo bloquea dispositivos marcados manualmente como 'perdido'
+        $stmt = Database::get()->prepare("SELECT 1 FROM dispositivos WHERE mac_address=? AND api_key=? AND estado!='perdido'");
         $stmt->bind_param('ss', $mac, $key);
         $stmt->execute();
         return $stmt->get_result()->num_rows > 0;

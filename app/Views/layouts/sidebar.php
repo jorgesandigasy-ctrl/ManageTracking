@@ -12,8 +12,8 @@
             [
                 'href'  => 'index.php',
                 'page'  => 'dashboard',
-                'label' => 'Dashboard',
-                'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+                'label' => 'Métricas',
+                'icon'  => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none"><path d="M15 12a3 3 0 1 1-6 0a3 3 0 0 1 6 0"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M19.567 4.414L14.11 9.87m0 0a3 3 0 1 0-4.223 4.263A3 3 0 0 0 14.11 9.87Z"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 20.662A10 10 0 0 1 2 12C2 6.477 6.477 2 12 2a10 10 0 0 1 3.135.501m1.868 18.16A10 10 0 0 0 22 12a10 10 0 0 0-.501-3.136"/></g></svg>',
             ],
             [
                 'href'  => 'dispositivos.php',

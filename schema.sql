@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     estado ENUM('activo', 'inactivo', 'perdido') DEFAULT 'activo',
     ultima_vez TIMESTAMP NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sede_id) REFERENCES sedes(id) ON SET NULL
+    FOREIGN KEY (sede_id) REFERENCES sedes(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS registros_gps (
@@ -72,3 +72,13 @@ CREATE TABLE IF NOT EXISTS encuestas (
 -- ALTER TABLE dispositivos
 --   MODIFY COLUMN mac_address VARCHAR(20) NOT NULL,
 --   MODIFY COLUMN tipo ENUM('laptop','pc','esp8266','gps','otro') DEFAULT 'laptop';
+--
+-- ALTER TABLE registros_gps
+--   ADD COLUMN tiempo_respuesta_ms DECIMAL(10,3) DEFAULT NULL;
+--
+-- CREATE TABLE IF NOT EXISTS encuestas (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     p1 TINYINT NOT NULL, p2 TINYINT NOT NULL, p3 TINYINT NOT NULL,
+--     p4 TINYINT NOT NULL, p5 TINYINT NOT NULL,
+--     respondido_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
