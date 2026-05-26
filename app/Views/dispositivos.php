@@ -190,7 +190,11 @@ async function cargarEquipos() {
                 ${d.telefono_usuario ? `<div class="text-xs text-gray-400">${d.telefono_usuario}</div>` : ''}
             </td>
             <td class="p-4 capitalize text-gray-300 text-xs">${d.tipo}</td>
-            <td class="p-4 text-xs text-gray-400">${d.sede_nombre || '—'}</td>
+            <td class="p-4 text-xs">
+                ${d.sede_detectada_nombre
+                    ? `<span class="text-blue-300">${d.sede_detectada_nombre}</span><span class="ml-1 text-gray-600 text-xs">GPS</span>`
+                    : (d.sede_nombre ? `<span class="text-gray-400">${d.sede_nombre}</span>` : '<span class="text-gray-600">—</span>')}
+            </td>
             <td class="p-4">
                 <div class="text-xs text-gray-300 truncate max-w-[180px]" title="${d.procesador||''}">${d.procesador ? d.procesador.substring(0,30)+'…' : '—'}</div>
                 ${d.ram_gb ? `<div class="text-xs text-gray-500">${d.ram_gb} GB RAM · ${d.almacenamiento_gb||'?'} GB</div>` : ''}

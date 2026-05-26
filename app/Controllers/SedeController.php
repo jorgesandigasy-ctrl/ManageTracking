@@ -10,7 +10,10 @@ class SedeController {
         $clienteId = intval($d['cliente_id'] ?? 0);
         $nombre    = trim($d['nombre'] ?? '');
         if (!$clienteId || !$nombre) { http_response_code(400); echo json_encode(['error' => 'cliente_id y nombre requeridos']); return; }
-        $id = Sede::create($clienteId, $nombre, trim($d['ciudad'] ?? ''), trim($d['direccion'] ?? ''));
+        $lat   = isset($d['latitud'])  && $d['latitud']  !== '' ? floatval($d['latitud'])  : null;
+        $lng   = isset($d['longitud']) && $d['longitud'] !== '' ? floatval($d['longitud']) : null;
+        $radio = intval($d['radio_metros'] ?? 120) ?: 120;
+        $id = Sede::create($clienteId, $nombre, trim($d['ciudad'] ?? ''), trim($d['direccion'] ?? ''), $lat, $lng, $radio);
         echo json_encode(['ok' => true, 'id' => $id]);
     }
 
@@ -18,7 +21,10 @@ class SedeController {
         $id     = intval($d['id'] ?? 0);
         $nombre = trim($d['nombre'] ?? '');
         if (!$id || !$nombre) { http_response_code(400); echo json_encode(['error' => 'ID y nombre requeridos']); return; }
-        Sede::update($id, $nombre, trim($d['ciudad'] ?? ''), trim($d['direccion'] ?? ''));
+        $lat   = isset($d['latitud'])  && $d['latitud']  !== '' ? floatval($d['latitud'])  : null;
+        $lng   = isset($d['longitud']) && $d['longitud'] !== '' ? floatval($d['longitud']) : null;
+        $radio = intval($d['radio_metros'] ?? 120) ?: 120;
+        Sede::update($id, $nombre, trim($d['ciudad'] ?? ''), trim($d['direccion'] ?? ''), $lat, $lng, $radio);
         echo json_encode(['ok' => true]);
     }
 

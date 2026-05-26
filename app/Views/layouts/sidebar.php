@@ -1,9 +1,6 @@
 <aside class="w-56 bg-gray-800 border-r border-gray-700 flex flex-col flex-shrink-0">
     <div class="h-16 flex items-center px-4 border-b border-gray-700 gap-3">
-        <svg class="w-6 h-6 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="auto" fill="none" viewBox="0 0 554 512"><path fill="#0052a9" d="M39.677 419.47h474.989s86.532 92.53 0 92.53H39.677c-89.273 0 0-92.53 0-92.53"/><path fill="#d9d9d9" d="M218.569 471.904h120.289v12.337H218.569z"/><path fill="#0052a9" d="M156.475 92.53a126 126 0 0 0-.963 15.595c0 7.3.624 14.453 1.822 21.405h-56.487c-9.941 0-18 8.059-18 18v204.603c0 9.941 8.059 18 18 18h352.65c9.941 0 18-8.059 18-18V147.53c0-9.941-8.059-18-18-18H397.35a126 126 0 0 0 1.825-21.405c0-5.282-.328-10.487-.962-15.595h55.284c30.376 0 55 24.624 55 55v204.603l-.004.711c-.378 29.811-24.474 53.906-54.285 54.284l-.711.005h-352.65l-.711-.005c-29.812-.378-53.907-24.473-54.284-54.284l-.005-.711V147.53c0-30.376 24.624-55 55-55z"/><path fill="#0052a9" d="M277.343 0c60.472 0 109.494 49.713 109.494 111.036 0 16.942-3.744 32.997-10.435 47.363-24.256 54.45-99.108 146.921-99.132 146.951 0 0-82.48-99.974-102.202-154.584-4.663-12.336-7.219-25.73-7.219-39.73C167.849 49.713 216.871 0 277.343 0m1.542 61.687c-32.365 0-58.602 26.237-58.602 58.602s26.237 58.603 58.602 58.603 58.603-26.238 58.603-58.603-26.238-58.602-58.603-58.602"/></svg>
         <span class="text-base font-bold truncate">ManageTracking</span>
     </div>
     <nav class="flex-1 p-3 space-y-1">
@@ -26,12 +23,6 @@
                 'page'  => 'clientes',
                 'label' => 'Clientes',
                 'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>',
-            ],
-            [
-                'href'  => 'encuesta.php',
-                'page'  => 'encuesta',
-                'label' => 'Encuesta',
-                'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
             ],
         ];
         foreach ($navItems as $nav):

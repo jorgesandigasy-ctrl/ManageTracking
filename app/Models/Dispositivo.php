@@ -11,7 +11,9 @@ class Dispositivo {
         return Database::get()->query("
             SELECT d.mac_address, d.hostname, d.nombre_usuario, d.apellido_usuario,
                    d.telefono_usuario, d.tipo, d.sede_id,
-                   s.nombre AS sede_nombre,
+                   s.nombre  AS sede_nombre,
+                   sd.nombre AS sede_detectada_nombre,
+                   d.ultima_sede_detectada_id,
                    d.windows_version, d.procesador, d.ram_gb, d.almacenamiento_gb,
                    d.serie_equipo, d.api_key, d.ultima_vez,
                    CASE
@@ -21,7 +23,8 @@ class Dispositivo {
                    END AS estado,
                    g.latitud, g.longitud, g.registrado_en AS ultima_ubicacion
             FROM dispositivos d
-            LEFT JOIN sedes s ON s.id = d.sede_id
+            LEFT JOIN sedes s  ON s.id  = d.sede_id
+            LEFT JOIN sedes sd ON sd.id = d.ultima_sede_detectada_id
             LEFT JOIN registros_gps g ON g.id = (
                 SELECT id FROM registros_gps
                 WHERE mac_address = d.mac_address
@@ -66,15 +69,16 @@ class Dispositivo {
         $proc     = trim($d['procesador']       ?? '');
 
         if ($row) {
+            // UPDATE: solo toca datos de hardware. Nombre, teléfono y sede
+            // los gestiona el admin desde el panel y no deben ser sobreescritos.
             $api_key = $row['api_key'];
             $stmt = $conn->prepare("
                 UPDATE dispositivos SET
-                    hostname=?, nombre_usuario=?, apellido_usuario=?, telefono_usuario=?,
-                    sede_id=?, tipo=?, windows_version=?, serie_equipo=?,
+                    hostname=?, tipo=?, windows_version=?, serie_equipo=?,
                     ram_gb=?, almacenamiento_gb=?, procesador=?, ultima_vez=NOW()
                 WHERE mac_address=?
             ");
-            $stmt->bind_param('ssssiissiiis', $hostname, $nomb, $apel, $tel, $sede, $tipo, $winver, $serie, $ram, $disco, $proc, $mac);
+            $stmt->bind_param('ssssiiss', $hostname, $tipo, $winver, $serie, $ram, $disco, $proc, $mac);
         } else {
             $api_key = bin2hex(random_bytes(32));
             $stmt = $conn->prepare("
@@ -83,7 +87,7 @@ class Dispositivo {
                      sede_id, tipo, windows_version, serie_equipo, ram_gb, almacenamiento_gb, procesador, api_key)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param('ssssiissiiiss', $mac, $hostname, $nomb, $apel, $tel, $sede, $tipo, $winver, $serie, $ram, $disco, $proc, $api_key);
+            $stmt->bind_param('sssssisssiiss', $mac, $hostname, $nomb, $apel, $tel, $sede, $tipo, $winver, $serie, $ram, $disco, $proc, $api_key);
         }
         $stmt->execute();
         $stmt->close();
@@ -123,6 +127,12 @@ class Dispositivo {
     public static function updateLastSeen(string $mac): void {
         $stmt = Database::get()->prepare("UPDATE dispositivos SET ultima_vez=NOW() WHERE mac_address=?");
         $stmt->bind_param('s', $mac);
+        $stmt->execute();
+    }
+
+    public static function updateUltimaSede(string $mac, ?int $sedeId): void {
+        $stmt = Database::get()->prepare("UPDATE dispositivos SET ultima_sede_detectada_id=? WHERE mac_address=?");
+        $stmt->bind_param('is', $sedeId, $mac);
         $stmt->execute();
     }
 }

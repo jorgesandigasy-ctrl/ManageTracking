@@ -28,12 +28,10 @@ import sys
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN — Editar antes de compilar el .exe
 # ─────────────────────────────────────────────────────────────────────────────
-SERVIDOR         = "https://lively-reprieve-production-3227.up.railway.app"  # URL del servidor ManageTracking
-NOMBRE_USUARIO   = ""      # El admin lo asigna desde el panel web
-APELLIDO_USUARIO = ""
-TELEFONO_USUARIO = ""
-SEDE_ID          = None    # El admin lo asigna desde el panel web
-INTERVALO        = 3600    # Segundos entre envíos de ubicación (3600 = 1 hora)
+SERVIDOR    = "http://localhost/managetracking"
+# SERVIDOR  = "https://lively-reprieve-production-3227.up.railway.app"  # URL del servidor ManageTracking
+INTERVALO = 3600    # Segundos entre envíos de ubicación (3600 = 1 hora)
+# Nombre, teléfono y sede se asignan desde el panel web — no se configuran aquí
 # ─────────────────────────────────────────────────────────────────────────────
 
 # El log se guarda en la misma carpeta que el .exe (o el .py si no está compilado)
@@ -49,7 +47,6 @@ logging.basicConfig(
 
 
 def ejecutar_powershell(command):
-    """Ejecuta un comando PowerShell y devuelve la salida como texto limpio."""
     out = subprocess.run(
         ["powershell", "-NoProfile", "-Command", command],
         capture_output=True, text=True, errors="ignore"
@@ -58,21 +55,11 @@ def ejecutar_powershell(command):
 
 
 def get_mac():
-    """
-    Obtiene la dirección MAC del adaptador de red principal del equipo.
-    Se usa como identificador único del dispositivo en la base de datos.
-    uuid.getnode() devuelve el MAC del primer adaptador activo.
-    """
     mac_int = uuid.getnode()
     return ':'.join(('%012X' % mac_int)[i:i+2] for i in range(0, 12, 2))
 
 
 def get_specs():
-    """
-    Recopila las especificaciones de hardware del equipo usando WMI (PowerShell).
-    Estos datos se envían al registrar el dispositivo por primera vez.
-    El servidor hace un UPSERT: si el MAC ya existe, actualiza los datos.
-    """
     serie        = ejecutar_powershell("Get-CimInstance Win32_BIOS | Select-Object -ExpandProperty SerialNumber")
     procesador   = ejecutar_powershell("Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name")
     ram_bytes    = ejecutar_powershell("Get-CimInstance Win32_ComputerSystem | Select-Object -ExpandProperty TotalPhysicalMemory")
@@ -87,26 +74,16 @@ def get_specs():
     return {
         "mac_address":       get_mac(),
         "hostname":          socket.gethostname(),
-        "tipo":              "laptop",
+        "tipo":              'laptop',
         "windows_version":   platform.version(),
         "serie_equipo":      serie,
         "procesador":        procesador,
         "ram_gb":            ram_gb,
         "almacenamiento_gb": disco_gb,
-        "nombre_usuario":    NOMBRE_USUARIO,
-        "apellido_usuario":  APELLIDO_USUARIO,
-        "telefono_usuario":  TELEFONO_USUARIO,
-        "sede_id":           SEDE_ID,
     }
 
 
 def registrar_dispositivo():
-    """
-    Registra el equipo en el servidor y obtiene la api_key.
-    - Si el MAC ya existe en la BD: el servidor devuelve la api_key existente.
-    - Si es un equipo nuevo: el servidor crea el registro y devuelve una api_key nueva.
-    La api_key se usa en cada envío de ubicación para autenticar el equipo.
-    """
     specs = get_specs()
     r = requests.post(f"{SERVIDOR}/api/registrar_dispositivo.php", json=specs, timeout=10)
     if r.status_code == 200:
@@ -117,12 +94,6 @@ def registrar_dispositivo():
 
 
 def obtener_ubicacion():
-    """
-    Obtiene las coordenadas GPS del equipo usando la Windows Location API.
-    Internamente Windows usa WiFi positioning, GPS (si existe) o IP geolocation.
-    Espera hasta 20 segundos para que el sensor esté listo.
-    Lanza RuntimeError si la ubicación no está disponible (servicio desactivado).
-    """
     script_ps = """
 Add-Type -AssemblyName System.Device
 $w = New-Object System.Device.Location.GeoCoordinateWatcher('High')
@@ -152,11 +123,6 @@ $w.Stop()
 
 
 def enviar_ubicacion(mac, api_key):
-    """
-    Obtiene la ubicación actual y la envía al servidor.
-    El servidor valida la api_key, guarda las coordenadas en registros_gps
-    y actualiza el campo ultima_vez del dispositivo.
-    """
     lat, lon = obtener_ubicacion()
     r = requests.post(f"{SERVIDOR}/api/registrar_ubicacion.php", json={
         "mac_address": mac,
@@ -174,13 +140,6 @@ def enviar_ubicacion(mac, api_key):
 
 
 def main():
-    """
-    Flujo principal:
-      1. Registra el dispositivo y obtiene mac + api_key
-      2. Bucle infinito: cada INTERVALO segundos envía la ubicación
-    Si el registro inicial falla (sin conexión, servidor caído), el tracker
-    se detiene y registra el error en el log.
-    """
     logging.info("Tracker iniciado")
     try:
         mac, api_key = registrar_dispositivo()
