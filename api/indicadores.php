@@ -112,6 +112,28 @@ while ($row = $resultTMC_porEquipo->fetch_assoc()) {
     ];
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// INDICADOR 4 — Tiempo de Registro de Ubicación (TRU)
+// Fórmula: promedio de tiempo_respuesta_ms de los últimos 7 días
+// Mide: desde que el tracker envía el request hasta que queda registrado en BD
+// ══════════════════════════════════════════════════════════════════════════════
+$rowTRU = $conn->query("
+    SELECT
+        ROUND(AVG(tiempo_respuesta_ms), 2)  AS promedio_ms,
+        ROUND(MIN(tiempo_respuesta_ms), 2)  AS minimo_ms,
+        ROUND(MAX(tiempo_respuesta_ms), 2)  AS maximo_ms,
+        COUNT(*)                            AS total_registros
+    FROM registros_gps
+    WHERE tipo = 'ubicacion'
+      AND tiempo_respuesta_ms IS NOT NULL
+      AND registrado_en >= NOW() - INTERVAL 7 DAY
+")->fetch_assoc();
+
+$TRU_promedio = $rowTRU['promedio_ms'] !== null ? (float)$rowTRU['promedio_ms'] : null;
+$TRU_minimo   = $rowTRU['minimo_ms']   !== null ? (float)$rowTRU['minimo_ms']   : null;
+$TRU_maximo   = $rowTRU['maximo_ms']   !== null ? (float)$rowTRU['maximo_ms']   : null;
+$TRU_total    = (int)$rowTRU['total_registros'];
+
 echo json_encode([
     'trazabilidad' => [
         'porcentaje' => $NT_porcentaje,
@@ -129,5 +151,11 @@ echo json_encode([
         'porcentaje' => $rowTMC['tmc_global'] !== null ? (float)$rowTMC['tmc_global'] : 0,
         'por_equipo' => $TMC_porEquipo,
         'total'      => (int)$rowTMC['total_equipos'],
+    ],
+    'tiempo_registro' => [
+        'promedio_ms' => $TRU_promedio,
+        'minimo_ms'   => $TRU_minimo,
+        'maximo_ms'   => $TRU_maximo,
+        'total'       => $TRU_total,
     ],
 ]);

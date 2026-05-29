@@ -28,8 +28,8 @@ import sys
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN — Editar antes de compilar el .exe
 # ─────────────────────────────────────────────────────────────────────────────
-SERVIDOR    = "http://localhost/managetracking"
-# SERVIDOR  = "https://lively-reprieve-production-3227.up.railway.app"  # URL del servidor ManageTracking
+# SERVIDOR    = "http://localhost/managetracking"
+SERVIDOR  = "https://lively-reprieve-production-3227.up.railway.app"  # URL del servidor ManageTracking
 INTERVALO = 3600    # Segundos entre envíos de ubicación (3600 = 1 hora)
 # Nombre, teléfono y sede se asignan desde el panel web — no se configuran aquí
 # ─────────────────────────────────────────────────────────────────────────────

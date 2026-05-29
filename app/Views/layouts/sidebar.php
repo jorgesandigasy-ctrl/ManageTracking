@@ -9,8 +9,8 @@
             [
                 'href'  => 'index.php',
                 'page'  => 'dashboard',
-                'label' => 'Métricas',
-                'icon'  => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none"><path d="M15 12a3 3 0 1 1-6 0a3 3 0 0 1 6 0"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M19.567 4.414L14.11 9.87m0 0a3 3 0 1 0-4.223 4.263A3 3 0 0 0 14.11 9.87Z"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 20.662A10 10 0 0 1 2 12C2 6.477 6.477 2 12 2a10 10 0 0 1 3.135.501m1.868 18.16A10 10 0 0 0 22 12a10 10 0 0 0-.501-3.136"/></g></svg>',
+                'label' => 'Activos',
+                'icon'  => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 2048 2048"><path fill="currentColor" d="M1792 1280h256v768H1024v-768h256v-256h512zm-384-128v128h256v-128zm512 768v-256h-128v128h-128v-128h-256v128h-128v-128h-128v256zm0-384v-128h-768v128zm-768-512v128H896v256H640v-128h128v-128H512v256H0V640h128V128h1536v768h-128V256H256v384h256v384zm-768 256V768H128v512z"/></svg>',
             ],
             [
                 'href'  => 'dispositivos.php',
@@ -24,6 +24,13 @@
                 'label' => 'Clientes',
                 'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>',
             ],
+            [
+                'href'  => 'metricas.php',
+                'page'  => 'metricas',
+                'label' => 'Indicadores',
+                'icon'  => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none"><path d="M15 12a3 3 0 1 1-6 0a3 3 0 0 1 6 0"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M19.567 4.414L14.11 9.87m0 0a3 3 0 1 0-4.223 4.263A3 3 0 0 0 14.11 9.87Z"/><path stroke="currentColor" stroke-linecap="square" stroke-width="2" d="M7 20.662A10 10 0 0 1 2 12C2 6.477 6.477 2 12 2a10 10 0 0 1 3.135.501m1.868 18.16A10 10 0 0 0 22 12a10 10 0 0 0-.501-3.136"/></g></svg>',
+            ],
+            
         ];
         foreach ($navItems as $nav):
             $active = ($activePage ?? '') === $nav['page'];
@@ -38,7 +45,7 @@
         <?php endforeach; ?>
     </nav>
     <div class="p-4 border-t border-gray-700 space-y-3">
-        <?php if (($activePage ?? '') === 'dashboard'): ?>
+        <?php if (in_array($activePage ?? '', ['dashboard', 'metricas'])): ?>
         <div class="flex items-center gap-2 text-xs text-gray-400">
             <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0"></span>
             En vivo · cada 15s
