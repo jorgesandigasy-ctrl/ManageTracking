@@ -42,8 +42,8 @@ include __DIR__ . '/layouts/head.php';
             </div>
         </div>
 
-        <!-- Indicadores de tesis — 4 columnas -->
-        <div class="grid grid-cols-4 gap-4">
+        <!-- Indicadores de tesis — 3 columnas -->
+        <div class="grid grid-cols-3 gap-4">
 
             <!-- NT: Nivel de Trazabilidad -->
             <div class="bg-gray-800 rounded-xl border border-gray-700 p-5">
@@ -92,17 +92,6 @@ include __DIR__ . '/layouts/head.php';
                     </div>
                 </div>
                 <p id="ind-tmc-det" class="text-xs text-gray-500 text-center mt-3">—</p>
-            </div>
-
-            <!-- TRU: Tiempo de Registro de Ubicación -->
-            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5">
-                <p class="text-xs text-violet-400 uppercase tracking-wider font-semibold mb-0.5">TRU — Tiempo de Registro</p>
-                <p class="text-xs text-gray-500 mb-6">Tiempo promedio desde el request hasta el registro en BD (7 días)</p>
-                <div class="flex flex-col items-center gap-1 py-4">
-                    <span id="ind-tru-val" class="text-4xl font-bold text-violet-400">—</span>
-                    <span class="text-xs text-gray-500">promedio de registro</span>
-                </div>
-                <p id="ind-tru-det" class="text-xs text-gray-500 text-center mt-3">—</p>
             </div>
 
         </div>
@@ -173,20 +162,6 @@ async function cargarIndicadores() {
             data: { datasets: [{ data: [TMC, 100 - TMC], backgroundColor: [colorTMC, '#374151'], borderWidth: 0, circumference: 180, rotation: -90 }] },
             options: { responsive: true, cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
         });
-
-        const TRU = d.tiempo_registro;
-        if (TRU && TRU.promedio_ms !== null) {
-            const ms       = TRU.promedio_ms;
-            const colorTRU = ms <= 100 ? '#a78bfa' : ms <= 500 ? '#f59e0b' : '#ef4444';
-            const label    = ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(2)} s`;
-            document.getElementById('ind-tru-val').textContent  = label;
-            document.getElementById('ind-tru-val').style.color  = colorTRU;
-            document.getElementById('ind-tru-det').textContent  =
-                `Mín ${TRU.minimo_ms} ms · Máx ${TRU.maximo_ms} ms · ${TRU.total} registros`;
-        } else {
-            document.getElementById('ind-tru-val').textContent = 'Sin datos';
-            document.getElementById('ind-tru-det').textContent = 'Aún no hay registros con medición';
-        }
 
     } catch (e) { console.error('Error indicadores:', e); }
 }
